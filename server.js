@@ -15,14 +15,17 @@ app.get("/", (req, res) => {
 
 // contact route
 app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, phone, message } = req.body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "Name, email and message are required" });
   }
 
   console.log("📩 New message received:");
-  console.log(name, email, message);
+  console.log("Name:", name);
+  console.log("Email:", email);
+  console.log("Phone:", phone || "Not provided");
+  console.log("Message:", message);
 
   res.json({ message: "Message received successfully" });
 });
