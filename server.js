@@ -4,8 +4,16 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// CORS configuration - allows requests from all devices (mobile, desktop, etc.)
+const corsOptions = {
+  origin: "*", // Allow all origins (update with your frontend URL in production)
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false
+};
+
 // middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // test route
