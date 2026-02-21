@@ -1,3 +1,6 @@
+const Contact = require("./models/contact");
+const mongoose = require("mongoose");
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
@@ -15,6 +18,16 @@ const corsOptions = {
 // middlewares
 app.use(cors(corsOptions));
 app.use(express.json());
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+  });
+
 
 // test route
 app.get("/", (req, res) => {
@@ -22,20 +35,35 @@ app.get("/", (req, res) => {
 });
 
 // contact route
-app.post("/contact", (req, res) => {
-  const { name, email, phone, message } = req.body;
+app.post("/contact", async (req, res) => {
+  try {
+    console.log("📍 Received request body:", req.body);
+    
+    const { name, email, phone, message } = req.body;
 
-  if (!name || !email || !message) {
-    return res.status(400).json({ message: "Name, email and message are required" });
+    if (!name || !email || !message) {
+      console.log("❌ Validation failed - missing fields");
+      return res.status(400).json({ message: "Name, email and message are required" });
+    }
+
+    const newContact = new Contact({
+      name,
+      email,
+      phone,
+      message
+    });
+
+    console.log("💾 Attempting to save contact...");
+    const savedContact = await newContact.save();
+    console.log("✅ Saved to MongoDB:", savedContact._id);
+
+    res.status(200).json({ message: "Message saved successfully", id: savedContact._id });
+
+  } catch (error) {
+    console.error("❌ Error saving to MongoDB:", error.message);
+    console.error("Full error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
-
-  console.log("📩 New message received:");
-  console.log("Name:", name);
-  console.log("Email:", email);
-  console.log("Phone:", phone || "Not provided");
-  console.log("Message:", message);
-
-  res.json({ message: "Message received successfully" });
 });
 
 // start server
